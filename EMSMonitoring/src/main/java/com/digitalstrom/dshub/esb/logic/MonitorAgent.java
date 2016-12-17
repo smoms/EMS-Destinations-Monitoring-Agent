@@ -44,7 +44,7 @@ public class MonitorAgent {
 		Runnable ruler = new MonitorRuler(this.map_queues_mg_count, this.map_queues_mg_count_tmp,
 				this.map_topics_mg_count, this.map_topics_mg_count_tmp, queue, message_count_threshold, notifier);
 		
-		//new Thread(poller).start();
+		new Thread(poller).start();
 		new Thread(ruler).start();
 	}
 

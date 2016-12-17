@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 public class ReadConfigs {
 
-	private static final String FILENAME = "C:\\Users\\antonio.bruno\\workspace\\monitoringagent\\config\\server_conf.cfg";
+	private static final String FILENAME = "C:\\Personal\\Projects\\EMSMonitoring\\EMSMonitoring\\config\\server_conf.cfg";
 	private static Map<String, String> configParams;
 	
 	public static void main(String[] args) {
