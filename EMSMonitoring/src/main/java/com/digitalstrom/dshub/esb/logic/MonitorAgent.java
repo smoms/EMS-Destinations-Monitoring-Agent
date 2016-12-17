@@ -51,5 +51,4 @@ public class MonitorAgent {
 	public static void main(String[] args) {
 		MonitorAgent mon = new MonitorAgent();
 	}
-
 }
