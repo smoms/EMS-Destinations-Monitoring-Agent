@@ -1,15 +1,25 @@
 package com.digitalstrom.dshub.esb.logic;
 
+import java.util.Map;
+
+import org.apache.log4j.Logger;
+
 import com.digitalstrom.dshub.esb.contract.INotifier;
 
 public class ConsoleNotifier implements INotifier {
 
-	public void SendNotification(String title, String env, String msgBody, String receivers) {
+	final static Logger logger = Logger.getLogger("ConsoleNotifier");
 
-		System.out.println("Notification sent to receivers: "+receivers);
-		System.out.println("Environment: "+receivers);
-		System.out.println("Title: "+title);
-		System.out.println("Message: "+msgBody);
+	public void SendNotification(Map notificationBacklog, String title, String env, String msgBody, String receivers) {
+
+		Map<String, String> map = notificationBacklog;
+		logger.info("The following destinations are increasing the pending backlog:");
+		for (Map.Entry<String, String> entry : map.entrySet()) {
+			logger.info(entry.getKey() + " <--> " + entry.getValue());
+		}
+		logger.info("Notification sent to receivers: " + receivers);
+		logger.info("Environment: " + receivers);
+		logger.info("Title: " + title);
+		logger.info("Message: " + msgBody);
 	}
-
 }
