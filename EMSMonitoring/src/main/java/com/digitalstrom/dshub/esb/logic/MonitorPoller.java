@@ -24,6 +24,7 @@ public class MonitorPoller implements Runnable {
 	private IMonitorStatisticsProvider msp_queues = null;
 	private IMonitorStatisticsProvider msp_topics = null;
 	private Map<String, Long> notificationBacklog = null;
+	private Map<String, Long> notificationDeltaBacklog = null;
 	int polling_time_is_msec = 0;
 	private int message_count_threshold = 0;
 	private Date notificationDate = null;
@@ -36,6 +37,8 @@ public class MonitorPoller implements Runnable {
 		this.msp_topics = msp_topics;
 		this.polling_time_is_msec = polling_time_is_sec * 1000;
 		this.message_count_threshold = message_count_threshold;
+		this.notificationBacklog = new HashMap<String, Long>();
+		this.notificationDeltaBacklog = new HashMap<String, Long>();
 	}
 
 	public void run() {
@@ -43,7 +46,6 @@ public class MonitorPoller implements Runnable {
 			try {
 				this.map_queues_mg_count_tmp = msp_queues.getDestinationsPendingMessageCount();
 				this.map_topics_mg_count_tmp = msp_topics.getDestinationsPendingMessageCount();
-				this.notificationBacklog = new HashMap<String, Long>();
 				logger.debug("The Poller is triggering the queue rules..");
 				this.applyDestinationRules(map_queues_mg_count, map_queues_mg_count_tmp,
 						MonitorPoller.destinationQueue);
@@ -67,7 +69,6 @@ public class MonitorPoller implements Runnable {
 		Integer tmpCount = new Integer(0);
 		Integer countThresholdMultiplier = new Integer(0);
 		Integer countTmpThresholdMultiplier = new Integer(0);
-		this.notificationBacklog = new HashMap<String, Long>();
 
 		// Initialize map_destination_msg_count hashset
 		if (map_destinations_msg_count == null) {
@@ -89,21 +90,23 @@ public class MonitorPoller implements Runnable {
 						|| (entry.getValue() > this.message_count_threshold
 								&& (this.notificationDate == null || new Date().after(notificationDate)))) {
 					this.notificationBacklog.put(entry.getKey(), entry.getValue());
+					this.notificationDeltaBacklog.put(entry.getKey(), entry.getValue());
 					map_destinations_msg_count.put(entry.getKey(), entry.getValue());
 				}
 			} else if (entry.getValue() > this.message_count_threshold) {
 				this.notificationBacklog.put(entry.getKey(), entry.getValue());
+				this.notificationDeltaBacklog.put(entry.getKey(), entry.getValue());
 				map_destinations_msg_count.put(entry.getKey(), entry.getValue());
 			}
 		}
 	}
 
 	private void checkForNotification() {
-		if (this.notificationBacklog != null && this.notificationBacklog.size() > 0) {
+		if (this.notificationDeltaBacklog.size() > 0) {
 			logger.debug("The Poller is triggering the notification..");
-			this.notifier.SendNotification(notificationBacklog, "todo title", "todo env", "todo msg", "todo receivers");
+			this.notifier.SendNotification(notificationBacklog, notificationDeltaBacklog, "todo title", "todo env", "todo msg", "todo receivers");
 		}
-		notificationBacklog.clear();
+		notificationDeltaBacklog.clear();
 		notificationDate = new Date();
 	}
 
