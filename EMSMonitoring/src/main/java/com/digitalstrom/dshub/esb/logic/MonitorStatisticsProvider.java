@@ -3,6 +3,7 @@ package com.digitalstrom.dshub.esb.logic;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.digitalstrom.dshub.esb.contract.IDestinationInfoProvider;
 import com.digitalstrom.dshub.esb.contract.IMonitorStatisticsProvider;
 import com.tibco.tibjms.admin.DestinationInfo;
 import com.tibco.tibjms.admin.TibjmsAdminException;
@@ -10,7 +11,7 @@ import com.tibco.tibjms.admin.TibjmsAdminException;
 public class MonitorStatisticsProvider implements IMonitorStatisticsProvider {
 
 	DestinationInfo[] destInfo = null;
-	DestinationsInfoFactory desFac = null;
+	IDestinationInfoProvider desFac = null;
 
 	public MonitorStatisticsProvider(String destInfo) throws TibjmsAdminException, Exception {
 		super();

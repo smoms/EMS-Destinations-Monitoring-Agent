@@ -2,17 +2,20 @@ package com.digitalstrom.dshub.esb.logic;
 
 import org.apache.log4j.Logger;
 
+import com.digitalstrom.dshub.esb.contract.IDestinationInfoProvider;
 import com.tibco.tibjms.admin.DestinationInfo;
+import com.tibco.tibjms.admin.TibjmsAdmin;
 import com.tibco.tibjms.admin.TibjmsAdminException;
 
-public class TopicsInfoFactory extends DestinationsInfoFactory{
+public class TopicsInfoProvider implements IDestinationInfoProvider{
 	final static Logger logger = Logger.getLogger("TopicsInfoFactory");
+	TibjmsAdmin admin = null;
 
-	public TopicsInfoFactory() throws TibjmsAdminException {
-		super();
+	public TopicsInfoProvider() throws TibjmsAdminException {
+		this.admin = AdminProvider.getInstance().getAdminConnection();
+		logger.info("Admin provider object obtained with connectionId: "+ this.admin.getConnectionId());
 	}
 
-	@Override
 	public DestinationInfo[] getDestinationsInfo() throws TibjmsAdminException {
 		logger.info("getDestinationsInfo for topics called");
 		return this.admin.getTopics();

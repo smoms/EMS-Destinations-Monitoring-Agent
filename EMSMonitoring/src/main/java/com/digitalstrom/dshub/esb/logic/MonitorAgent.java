@@ -38,5 +38,6 @@ public class MonitorAgent {
 
 	public static void main(String[] args) {
 		MonitorAgent mon = new MonitorAgent();
+		logger.debug("Main method is going to die.");
 	}
 }
