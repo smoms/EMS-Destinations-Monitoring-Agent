@@ -104,7 +104,7 @@ public class MonitorPoller implements Runnable {
 	private void checkForNotification() {
 		if (this.notificationDeltaBacklog.size() > 0) {
 			logger.debug("The Poller is triggering the notification..");
-			this.notifier.SendNotification(notificationBacklog, notificationDeltaBacklog, "todo title", "todo env", "todo msg", "todo receivers");
+			this.notifier.SendNotification(notificationBacklog, notificationDeltaBacklog, "todo title", "todo env");
 		}
 		notificationDeltaBacklog.clear();
 		notificationDate = new Date();

@@ -11,12 +11,12 @@ import com.tibco.tibjms.admin.TibjmsAdminException;
 public class MonitorStatisticsProvider implements IMonitorStatisticsProvider {
 
 	DestinationInfo[] destInfo = null;
-	IDestinationInfoProvider desFac = null;
+	IDestinationInfoProvider desProvider = null;
 
 	public MonitorStatisticsProvider(String destInfo) throws TibjmsAdminException, Exception {
 		super();
-		this.desFac = DestinationsInfoFactory.getFactory(destInfo);
-		this.destInfo = desFac.getDestinationsInfo();
+		this.desProvider = DestinationsInfoFactory.getDestinationProvider(destInfo);
+		this.destInfo = desProvider.getDestinationsInfo();
 	}
 
 	public Map<String, Long> getDestinationsPendingMessageCount() {

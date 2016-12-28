@@ -8,16 +8,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
+
 public class ReadConfigs {
 
 	private static final String FILENAME = "C:\\Personal\\Projects\\EMSMonitoring\\EMSMonitoring\\config\\server_conf.cfg";
 	private static Map<String, String> configParams;
-	
-	public static void main(String[] args) {
-
-		Map<String, String> map = new ReadConfigs().getConfParameters();
-		System.out.println(Arrays.toString(map.entrySet().toArray()));
-	}
+	final static Logger logger = Logger.getLogger("ReadConfigs");
 	
 	public static Map<String, String> getInstance(){
         return configParams;
@@ -25,10 +22,13 @@ public class ReadConfigs {
 	
 	private ReadConfigs(){};
 	
+	//Singleton
 	//static block initialization for exception handling
     static{
         try{
         	configParams = new ReadConfigs().getConfParameters();
+        	for(Map.Entry<String, String> entry : configParams.entrySet())
+        		logger.debug(entry.getKey() + "=" + entry.getValue());
         }catch(Exception e){
             throw new RuntimeException("Exception occured in creating singleton instance");
         }
@@ -50,11 +50,12 @@ public class ReadConfigs {
 			br = new BufferedReader(new FileReader(FILENAME));
 
 			while ((sCurrentLine = br.readLine()) != null) {
-				if(sCurrentLine.startsWith("#"))
+				if(sCurrentLine.startsWith("#") || sCurrentLine.isEmpty())
 					continue;
-				String[] tokens = sCurrentLine.split("\\s+");
+				String[] tokens = sCurrentLine.split("=");
+				//String[] tokens = sCurrentLine.split("(?<!,)\\s+");
 				if(tokens.length > 1)
-					map.put(tokens[0].trim().toLowerCase(), tokens[1].trim().toLowerCase());
+					map.put(tokens[0].trim().toLowerCase(), tokens[1].trim()); //be careful in the look-up: in memory all config key entries will be stored in lower-case!
 				else
 					map.put(tokens[0].trim().toLowerCase(), "");
 			}
@@ -84,4 +85,9 @@ public class ReadConfigs {
 		return map;
 	}
 
+	public static void main(String[] args) {
+
+		Map<String, String> map = new ReadConfigs().getConfParameters();
+		System.out.println(Arrays.toString(map.entrySet().toArray()));
+	}
 }

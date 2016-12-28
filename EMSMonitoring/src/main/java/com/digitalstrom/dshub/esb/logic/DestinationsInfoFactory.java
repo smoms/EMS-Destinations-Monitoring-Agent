@@ -18,14 +18,14 @@ public abstract class DestinationsInfoFactory {
 
 	public abstract DestinationInfo[] getStatisticalDestinationsInfo() throws TibjmsAdminException;
 
-	public static IDestinationInfoProvider getFactory(String factory) throws Exception {
-		if (factory == null) {
+	public static IDestinationInfoProvider getDestinationProvider(String providerType) throws Exception {
+		if (providerType == null) {
 			return null;
 		}
-		if (factory.equalsIgnoreCase("QueuesInfoFactory")) {
+		if (providerType.equalsIgnoreCase("QueuesInfoProvider")) {
 			return new QueuesInfoProvider();
 
-		} else if (factory.equalsIgnoreCase("TopicsInfoFactory")) {
+		} else if (providerType.equalsIgnoreCase("TopicsInfoProvider")) {
 			return new TopicsInfoProvider();
 		}
 		return null;

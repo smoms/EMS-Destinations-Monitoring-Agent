@@ -21,4 +21,5 @@ public abstract class NotifierFactory {
 		return null;
 		// return (DestinationsInfoFactory ) Class.forName(f).newInstance();
 	}
+	
 }
