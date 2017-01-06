@@ -14,6 +14,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 
 import com.digitalstrom.dshub.esb.contract.INotifier;
 import com.digitalstrom.dshub.esb.util.ReadConfigs;
@@ -42,7 +43,7 @@ public class EmailNotifier implements INotifier {
 		this.emailbodytemplate = map.get("emailbodytemplate");
 	}
 
-	public void SendNotification(Map notificationBacklog, Map notificationDeltaBacklog, String title, String env) {
+	public void SendNotification(Map notificationBacklog, boolean isDeltaBacklog, String title, String env) {
 
 		final String emailusername = this.emailusername;
 		final String emailpassword = this.emailpassword;
@@ -67,7 +68,7 @@ public class EmailNotifier implements INotifier {
 			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(this.receiverslist));
 			message.setSubject(title + " env is: " + env);
 
-			emailBody = this.prepareEmailBody(notificationBacklog, notificationDeltaBacklog, emailbodytemplate);
+			emailBody = this.prepareEmailBody(notificationBacklog, emailbodytemplate);
 			message.setText(emailBody);
 
 			Transport.send(message);
@@ -80,18 +81,10 @@ public class EmailNotifier implements INotifier {
 		}
 	}
 
-	private String prepareEmailBody(Map<String, Long> notificationBacklog, Map<String, Long> notificationDeltaBacklog,
-			String emailbodytemplate) {
+	private String prepareEmailBody(Map<String, Long> notificationBacklog, String emailbodytemplate) {
 		String emailBody = emailbodytemplate;
 		StringBuilder deltaDest = new StringBuilder();
 		StringBuilder backlogDest = new StringBuilder();
-
-		logger.debug("Destination delta backlog: ");
-		for (Entry<String, Long> entry : notificationDeltaBacklog.entrySet()) {
-			deltaDest.append(entry.getKey() + " : " + entry.getValue());
-			deltaDest.append("; ");
-			logger.debug(entry.getKey() + " : " + entry.getValue());
-		}
 
 		logger.debug("Destination backlog: ");
 		for (Entry<String, Long> entry : notificationBacklog.entrySet()) {
@@ -106,18 +99,21 @@ public class EmailNotifier implements INotifier {
 	}
 
 	public static void main(String[] args) {
+		PropertyConfigurator.configure("C:\\Personal\\Projects\\EMSMonitoring\\EMSMonitoring\\"
+				+ "src\\main\\resources\\log4j.properties");
 		EmailNotifier sn = new EmailNotifier();
 		Map<String, Long> map = new HashMap<String, Long>();
 		Map<String, Long> mapDelta = new HashMap<String, Long>();
-		String emailbodytemplate = "These destinations are either new or their backlog in increased by at least 1+ threshold(s) since the last check: <<delta>>. "
-				+ "These destinations are over the limits: <<backlog>>";
+		String emailbodytemplate = "These destinations are either new or their backlog is increased by at least 1+ threshold(s) since the last check: <<delta>>. "
+				+ "These destinations have backlog over the limit: <<backlog>>";
 		String result;
 		for (int i=0; i<10;i++)
 			map.put("queue"+i, (long) i);
 		for (int i=0; i<10;i++)
 			mapDelta.put("queue-delta"+i, (long) i);
-		result = sn.prepareEmailBody(map, mapDelta, emailbodytemplate);
+		result = sn.prepareEmailBody(map, emailbodytemplate);
 		System.out.println(result);
 		//sn.SendNotification(null, null, "title", "dev");
 	}
+	
 }

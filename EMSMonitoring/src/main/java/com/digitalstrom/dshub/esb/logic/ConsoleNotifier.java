@@ -10,22 +10,15 @@ public class ConsoleNotifier implements INotifier {
 
 	final static Logger logger = Logger.getLogger("ConsoleNotifier");
 
-	public void SendNotification(Map notificationBacklog, Map notificationDeltaBacklog, String title, 
-			String env) {
+	public void SendNotification(Map notificationBacklog, boolean isDelatBacklog, String title, String env) {
 
-		Map<String, String> map = notificationBacklog;
-		Map<String, String> mapDelta = notificationDeltaBacklog;
-		logger.info("The following destinations have high pending backlog:");
-		for (Map.Entry<String, String> entry : map.entrySet()) {
-			logger.info(entry.getKey() + " <--> " + entry.getValue());
-		}
-		logger.info("The following destinations are increasing the pending backlog:");
-		for (Map.Entry<String, String> entry : mapDelta.entrySet()) {
-			logger.info(entry.getKey() + " <--> " + entry.getValue());
-		}
-		logger.info("Notification sent. ");
 		logger.info("Title: " + title);
-		logger.info("Message Destination Backlog: " + notificationBacklog.toString());
-		logger.info("Message Destination Delta: " + notificationDeltaBacklog.toString());
+		if (notificationBacklog != null)
+			if (isDelatBacklog)
+				logger.info("Message Destination Delta Backlog: " + notificationBacklog.toString());
+			else
+				logger.info("Message Destination Backlog: " + notificationBacklog.toString());
+		logger.info("Notification sent. ");
 	}
+
 }

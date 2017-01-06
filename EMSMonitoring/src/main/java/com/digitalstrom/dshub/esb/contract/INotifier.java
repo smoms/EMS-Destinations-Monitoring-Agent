@@ -4,5 +4,5 @@ import java.util.Map;
 
 public interface INotifier {
 
-	public void SendNotification(Map notificationBacklog, Map notificationDeltaBacklog, String title, String env);
+	public void SendNotification(Map notificationBacklog, boolean isDelataBacklog, String title, String env);
 }

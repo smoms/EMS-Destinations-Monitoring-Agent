@@ -17,12 +17,12 @@ public class TopicsInfoProvider implements IDestinationInfoProvider{
 	}
 
 	public DestinationInfo[] getDestinationsInfo() throws TibjmsAdminException {
-		logger.info("getDestinationsInfo for topics called");
+		logger.debug("getDestinationsInfo for topics called");
 		return this.admin.getTopics();
 	}
 	
 	public DestinationInfo[] getStatisticalDestinationsInfo() throws TibjmsAdminException {
-		logger.info("getStatisticalDestinationsInfo for topics called");
+		logger.debug("getStatisticalDestinationsInfo for topics called");
 		return this.admin.getTopicsStatistics();
 	}
 

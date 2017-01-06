@@ -5,10 +5,11 @@ import java.util.Map;
 
 import com.digitalstrom.dshub.esb.contract.IMonitorStatisticsProvider;
 import com.digitalstrom.dshub.esb.logic.MonitorStatisticsProvider;
+import com.tibco.tibjms.admin.TibjmsAdminException;
 
 public class TestMain2 {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws TibjmsAdminException {
 
 		IMonitorStatisticsProvider eng = null;
 		Map map_count = null;

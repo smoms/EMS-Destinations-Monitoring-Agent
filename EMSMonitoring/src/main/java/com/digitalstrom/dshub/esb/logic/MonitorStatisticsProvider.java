@@ -16,23 +16,27 @@ public class MonitorStatisticsProvider implements IMonitorStatisticsProvider {
 	public MonitorStatisticsProvider(String destInfo) throws TibjmsAdminException, Exception {
 		super();
 		this.desProvider = DestinationsInfoFactory.getDestinationProvider(destInfo);
-		this.destInfo = desProvider.getDestinationsInfo();
+		//this.destInfo = desProvider.getDestinationsInfo();
 	}
 
-	public Map<String, Long> getDestinationsPendingMessageCount() {
+	public Map<String, Long> getDestinationsPendingMessageCount() throws TibjmsAdminException {
 		Map<String, Long> map = new HashMap();
+		this.destInfo = desProvider.getDestinationsInfo();
 
 		for (DestinationInfo des : destInfo) {
-			map.put(des.getName(), des.getPendingMessageCount());
+			if(!des.getName().startsWith("$sys."))
+				map.put(des.getName(), des.getPendingMessageCount());
 		}
 		return map;
 	}
 
-	public Map<String, Long> getDestinationsMessageSize() {
+	public Map<String, Long> getDestinationsMessageSize() throws TibjmsAdminException {
 		Map<String, Long> map = new HashMap();
+		this.destInfo = desProvider.getDestinationsInfo();
 
 		for (DestinationInfo des : destInfo) {
-			map.put(des.getName(), des.getPendingMessageSize());
+			if(!des.getName().startsWith("$sys."))
+				map.put(des.getName(), des.getPendingMessageSize());
 		}
 		return map;
 	}

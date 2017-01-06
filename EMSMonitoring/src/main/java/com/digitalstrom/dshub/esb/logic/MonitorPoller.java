@@ -1,5 +1,7 @@
 package com.digitalstrom.dshub.esb.logic;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +30,7 @@ public class MonitorPoller implements Runnable {
 	int polling_time_is_msec = 0;
 	private int message_count_threshold = 0;
 	private Date notificationDate = null;
+	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 	private INotifier notifier = NotifierFactory.getFactory("ConsoleNotifierFactory").getNotifier();
 
 	public MonitorPoller(IMonitorStatisticsProvider msp_queues, IMonitorStatisticsProvider msp_topics,
@@ -46,24 +49,33 @@ public class MonitorPoller implements Runnable {
 			try {
 				this.map_queues_mg_count_tmp = msp_queues.getDestinationsPendingMessageCount();
 				this.map_topics_mg_count_tmp = msp_topics.getDestinationsPendingMessageCount();
+				logger.debug("Poller got these queues and pending messages: " + map_queues_mg_count_tmp);
+				logger.debug("Poller got these topics and pending messages: " + map_topics_mg_count_tmp);
+				logger.debug("Poller has these queues and pending messages stored in memory: " + map_queues_mg_count);
+				logger.debug("Poller has these topics and pending messages stored in memory: " + map_topics_mg_count);
 				logger.debug("The Poller is triggering the queue rules..");
 				this.applyDestinationRules(map_queues_mg_count, map_queues_mg_count_tmp,
 						MonitorPoller.destinationQueue);
 				logger.debug("The Poller is triggering the topic rules..");
 				this.applyDestinationRules(map_topics_mg_count, map_topics_mg_count_tmp,
 						MonitorPoller.destinationTopic);
-				this.checkForNotification();
+				if(this.notificationDate == null || sdf.parse(sdf.format(new Date())).after(this.notificationDate))
+					this.sendNotification(this.notificationBacklog, false);
+				this.sendNotification(this.notificationDeltaBacklog, true);
 				logger.debug("The Poller is going to sleep for seconds: " + polling_time_is_msec / 1000);
 				Thread.sleep(polling_time_is_msec);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
+			}catch(ParseException e){
+				logger.error("Error in the poller loop when converting date format: ");
+				e.printStackTrace();
+			}catch (Exception e) {
+				logger.error("Error in the poller loop: ");
 				e.printStackTrace();
 			}
 		}
 	}
 
 	private void applyDestinationRules(Map<String, Long> map_destinations_msg_count,
-			Map<String, Long> map_destinations_mg_count_tmp, int destinaitonType) {
+			Map<String, Long> map_destinations_mg_count_tmp, int destinationType) throws ParseException {
 
 		Integer count = new Integer(0);
 		Integer tmpCount = new Integer(0);
@@ -72,7 +84,7 @@ public class MonitorPoller implements Runnable {
 
 		// Initialize map_destination_msg_count hashset
 		if (map_destinations_msg_count == null) {
-			if (destinaitonType == MonitorPoller.destinationQueue) {
+			if (destinationType == MonitorPoller.destinationQueue) {
 				map_queues_mg_count = new HashMap<String, Long>();
 				map_destinations_msg_count = map_queues_mg_count;
 			} else {
@@ -86,28 +98,25 @@ public class MonitorPoller implements Runnable {
 				tmpCount = map_destinations_mg_count_tmp.get(entry.getKey()).intValue();
 				countThresholdMultiplier = count / this.message_count_threshold;
 				countTmpThresholdMultiplier = tmpCount / this.message_count_threshold;
-				if (countTmpThresholdMultiplier > countThresholdMultiplier
-						|| (entry.getValue() > this.message_count_threshold
-								&& (this.notificationDate == null || new Date().after(notificationDate)))) {
-					this.notificationBacklog.put(entry.getKey(), entry.getValue());
+				if (countTmpThresholdMultiplier > countThresholdMultiplier)
 					this.notificationDeltaBacklog.put(entry.getKey(), entry.getValue());
-					map_destinations_msg_count.put(entry.getKey(), entry.getValue());
-				}
-			} else if (entry.getValue() > this.message_count_threshold) {
+				map_destinations_msg_count.put(entry.getKey(), entry.getValue());
+			}else if (entry.getValue() > this.message_count_threshold) {
 				this.notificationBacklog.put(entry.getKey(), entry.getValue());
-				this.notificationDeltaBacklog.put(entry.getKey(), entry.getValue());
 				map_destinations_msg_count.put(entry.getKey(), entry.getValue());
 			}
 		}
 	}
 
-	private void checkForNotification() {
-		if (this.notificationDeltaBacklog.size() > 0) {
+	private void sendNotification(Map notifBacklog, boolean isDeltaBacklog) throws ParseException {
+		if (notifBacklog != null && notifBacklog.size() > 0) {
 			logger.debug("The Poller is triggering the notification..");
-			this.notifier.SendNotification(notificationBacklog, notificationDeltaBacklog, "todo title", "todo env");
+			this.notifier.SendNotification(notifBacklog, isDeltaBacklog, "todo title", "todo env");
 		}
-		notificationDeltaBacklog.clear();
-		notificationDate = new Date();
+		if(isDeltaBacklog)
+			this.notificationDeltaBacklog.clear();
+		this.notificationDate = sdf.parse(sdf.format(new Date()));
+		logger.debug("Date refreshed: " + notificationDate);
 	}
-
+	
 }

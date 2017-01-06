@@ -17,13 +17,13 @@ public class QueuesInfoProvider implements IDestinationInfoProvider{
 	}
 
 	public DestinationInfo[] getDestinationsInfo() throws TibjmsAdminException {
-		logger.info("getDestinationsInfo for queues called");
+		logger.debug("getDestinationsInfo for queues called");
 		return this.admin.getQueues();
 	}
 
 	public DestinationInfo[] getStatisticalDestinationsInfo() throws TibjmsAdminException {
 		// this.admin = new ConfigFactory().getAdminConnection();
-		logger.info("getStatisticalDestinationsInfo for queues called");
+		logger.debug("getStatisticalDestinationsInfo for queues called");
 		return this.admin.getQueuesStatistics();
 	}
 
