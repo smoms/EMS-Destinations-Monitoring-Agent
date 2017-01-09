@@ -27,6 +27,7 @@ public class AdminProvider implements IAdminProvider {
 			}
 	}
 
+	//Singleton
 	public static IAdminProvider getInstance() throws TibjmsAdminException {
 	    if (instance == null) {
 	      synchronized(AdminProvider.class){

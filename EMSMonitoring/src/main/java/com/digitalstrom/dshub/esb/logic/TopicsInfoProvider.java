@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 
 import com.digitalstrom.dshub.esb.contract.IDestinationInfoProvider;
 import com.tibco.tibjms.admin.DestinationInfo;
+import com.tibco.tibjms.admin.ServerInfo;
 import com.tibco.tibjms.admin.TibjmsAdmin;
 import com.tibco.tibjms.admin.TibjmsAdminException;
 
@@ -25,7 +26,6 @@ public class TopicsInfoProvider implements IDestinationInfoProvider{
 		logger.debug("getStatisticalDestinationsInfo for topics called");
 		return this.admin.getTopicsStatistics();
 	}
-
 
 }
 

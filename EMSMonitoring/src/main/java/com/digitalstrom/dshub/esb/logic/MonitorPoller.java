@@ -17,9 +17,9 @@ import com.tibco.tibjms.admin.TibjmsAdminException;
 
 public class MonitorPoller implements Runnable {
 
-	final static Logger logger = Logger.getLogger("MonitorAgent");
-	final static int destinationQueue = 0;
-	final static int destinationTopic = 1;
+	private final static Logger logger = Logger.getLogger("MonitorAgent");
+	private final static int destinationQueue = 0;
+	private final static int destinationTopic = 1;
 	private Map<String, Long> map_queues_mg_count_tmp = null;
 	private Map<String, Long> map_topics_mg_count_tmp = null;
 	private Map<String, Long> map_queues_mg_count = null;
@@ -28,19 +28,24 @@ public class MonitorPoller implements Runnable {
 	private IMonitorStatisticsProvider msp_topics = null;
 	private Map<String, Long> notificationBacklog = null;
 	private Map<String, Long> notificationDeltaBacklog = null;
-	int polling_time_is_msec = 30000; //default to 30s
+	private int polling_time_is_msec = 30000; //default to 30s
 	private Date notificationDate = null;
-	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 	private INotifier notifier = NotifierFactory.getFactory("ConsoleNotifierFactory").getNotifier();
 	private Map<String, String> map = ReadConfigs.getInstance();
 	private int message_count_threshold = 1;
+	private IAdminProvider adminP;
+	private String serverName;
 	
-	public MonitorPoller(IMonitorStatisticsProvider msp_queues, IMonitorStatisticsProvider msp_topics) throws Exception {
+	public MonitorPoller() throws Exception {
 		super();
-		this.msp_queues = msp_queues;
-		this.msp_topics = msp_topics;
+		logger.debug("Connecting to the server..");
+		msp_queues = new MonitorStatisticsProvider("QueuesInfoProvider");
+		msp_topics = new MonitorStatisticsProvider("TopicsInfoProvider");
 		this.polling_time_is_msec = Integer.parseInt(map.get("serverpollingtimeinsec")) * 1000;
 		this.message_count_threshold = Integer.parseInt(map.get("messagecountthreshold"));
+		this.adminP = AdminProvider.getInstance();
+		this.serverName = this.adminP.getAdminConnection().getInfo().getServerName();
 		this.notificationBacklog = new HashMap<String, Long>();
 		this.notificationDeltaBacklog = new HashMap<String, Long>();
 	}
@@ -111,10 +116,10 @@ public class MonitorPoller implements Runnable {
 		}
 	}
 
-	private void sendNotification(Map notifBacklog, boolean isDeltaBacklog) throws ParseException {
+	private void sendNotification(Map notifBacklog, boolean isDeltaBacklog) throws ParseException, TibjmsAdminException {
 		if (notifBacklog != null && notifBacklog.size() > 0) {
 			logger.debug("The Poller is triggering the notification..");
-			this.notifier.SendNotification(notifBacklog, isDeltaBacklog, map.get("emailtitle"), map.get("environment"));
+			this.notifier.SendNotification(notifBacklog, isDeltaBacklog, map.get("emailtitle"), this.serverName, map.get("environment"));
 		}
 		if(isDeltaBacklog)
 			this.notificationDeltaBacklog.clear();

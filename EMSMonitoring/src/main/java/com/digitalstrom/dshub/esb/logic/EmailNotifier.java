@@ -43,7 +43,7 @@ public class EmailNotifier implements INotifier {
 		this.emailbodytemplate = map.get("emailbodytemplate");
 	}
 
-	public void SendNotification(Map notificationBacklog, boolean isDeltaBacklog, String title, String env) {
+	public void SendNotification(Map notificationBacklog, boolean isDeltaBacklog, String title, String serverName, String env) {
 
 		final String emailusername = this.emailusername;
 		final String emailpassword = this.emailpassword;
@@ -66,7 +66,7 @@ public class EmailNotifier implements INotifier {
 			Message message = new MimeMessage(session);
 			message.setFrom(new InternetAddress(this.emailusername));
 			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(this.receiverslist));
-			message.setSubject(title + " env is: " + env);
+			message.setSubject(title + " from the server " + serverName + " in the environement " + env);
 
 			emailBody = this.prepareEmailBody(notificationBacklog, emailbodytemplate);
 			message.setText(emailBody);
