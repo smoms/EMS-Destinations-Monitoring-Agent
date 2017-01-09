@@ -12,12 +12,12 @@ import com.digitalstrom.dshub.esb.util.ReadConfigs;
 import com.tibco.tibjms.admin.TibjmsAdmin;
 import com.tibco.tibjms.admin.TibjmsAdminException;
 
-public class EMSMonitoringAgent {
+public class MonitorAgent {
 
 	final static Logger logger = Logger.getLogger("MonitorAgent");
 	Runnable poller = null;
 
-	public EMSMonitoringAgent() {
+	public MonitorAgent() {
 		super();
 		try {
 			poller = new MonitorPoller();
@@ -29,7 +29,7 @@ public class EMSMonitoringAgent {
 	}
 
 	public static void main(String[] args) {
-		EMSMonitoringAgent mon = new EMSMonitoringAgent();
+		MonitorAgent mon = new MonitorAgent();
 		logger.debug("Useless main thread is going to die");
 	}
 }
