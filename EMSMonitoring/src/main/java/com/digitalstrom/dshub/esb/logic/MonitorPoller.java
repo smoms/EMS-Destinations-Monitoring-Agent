@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 import com.digitalstrom.dshub.esb.contract.IAdminProvider;
 import com.digitalstrom.dshub.esb.contract.IMonitorStatisticsProvider;
 import com.digitalstrom.dshub.esb.contract.INotifier;
+import com.digitalstrom.dshub.esb.util.ReadConfigs;
 import com.tibco.tibjms.admin.TibjmsAdminException;
 
 public class MonitorPoller implements Runnable {
@@ -27,19 +28,19 @@ public class MonitorPoller implements Runnable {
 	private IMonitorStatisticsProvider msp_topics = null;
 	private Map<String, Long> notificationBacklog = null;
 	private Map<String, Long> notificationDeltaBacklog = null;
-	int polling_time_is_msec = 0;
-	private int message_count_threshold = 0;
+	int polling_time_is_msec = 30000; //default to 30s
 	private Date notificationDate = null;
 	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 	private INotifier notifier = NotifierFactory.getFactory("ConsoleNotifierFactory").getNotifier();
-
-	public MonitorPoller(IMonitorStatisticsProvider msp_queues, IMonitorStatisticsProvider msp_topics,
-			int polling_time_is_sec, int message_count_threshold) throws Exception {
+	private Map<String, String> map = ReadConfigs.getInstance();
+	private int message_count_threshold = 1;
+	
+	public MonitorPoller(IMonitorStatisticsProvider msp_queues, IMonitorStatisticsProvider msp_topics) throws Exception {
 		super();
 		this.msp_queues = msp_queues;
 		this.msp_topics = msp_topics;
-		this.polling_time_is_msec = polling_time_is_sec * 1000;
-		this.message_count_threshold = message_count_threshold;
+		this.polling_time_is_msec = Integer.parseInt(map.get("serverpollingtimeinsec")) * 1000;
+		this.message_count_threshold = Integer.parseInt(map.get("messagecountthreshold"));
 		this.notificationBacklog = new HashMap<String, Long>();
 		this.notificationDeltaBacklog = new HashMap<String, Long>();
 	}
@@ -62,7 +63,9 @@ public class MonitorPoller implements Runnable {
 				if(this.notificationDate == null || sdf.parse(sdf.format(new Date())).after(this.notificationDate))
 					this.sendNotification(this.notificationBacklog, false);
 				this.sendNotification(this.notificationDeltaBacklog, true);
-				logger.debug("The Poller is going to sleep for seconds: " + polling_time_is_msec / 1000);
+				this.notificationDate = sdf.parse(sdf.format(new Date()));
+				logger.debug("Date refreshed: " + notificationDate);
+				logger.debug("The Poller is going to sleep for seconds: " + this.polling_time_is_msec / 1000);
 				Thread.sleep(polling_time_is_msec);
 			}catch(ParseException e){
 				logger.error("Error in the poller loop when converting date format: ");
@@ -111,12 +114,10 @@ public class MonitorPoller implements Runnable {
 	private void sendNotification(Map notifBacklog, boolean isDeltaBacklog) throws ParseException {
 		if (notifBacklog != null && notifBacklog.size() > 0) {
 			logger.debug("The Poller is triggering the notification..");
-			this.notifier.SendNotification(notifBacklog, isDeltaBacklog, "todo title", "todo env");
+			this.notifier.SendNotification(notifBacklog, isDeltaBacklog, map.get("emailtitle"), map.get("environment"));
 		}
 		if(isDeltaBacklog)
 			this.notificationDeltaBacklog.clear();
-		this.notificationDate = sdf.parse(sdf.format(new Date()));
-		logger.debug("Date refreshed: " + notificationDate);
 	}
 	
 }
