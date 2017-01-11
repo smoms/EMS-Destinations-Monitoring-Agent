@@ -4,8 +4,10 @@ C:\Personal\Projects\EMSMonitoring\EMSMonitoring\src\main\java\com\digitalstrom\
 C:\Personal\Projects\EMSMonitoring\EMSMonitoring\src\main\java\com\digitalstrom\dshub\esb\logic\EmailNotifier.java
 C:\Personal\Projects\EMSMonitoring\EMSMonitoring\src\main\java\com\digitalstrom\dshub\esb\util\ReadConfigs.java
 C:\Personal\Projects\EMSMonitoring\EMSMonitoring\src\main\java\com\digitalstrom\dshub\esb\contract\IDestinationInfoProvider.java
+C:\Personal\Projects\EMSMonitoring\EMSMonitoring\src\main\java\com\digitalstrom\dshub\esb\logic\EMSMonitoringAgent.java
 C:\Personal\Projects\EMSMonitoring\EMSMonitoring\src\main\java\com\digitalstrom\dshub\esb\logic\AdminProvider.java
 C:\Personal\Projects\EMSMonitoring\EMSMonitoring\src\main\java\com\digitalstrom\dshub\esb\logic\NotifierFactory.java
+C:\Personal\Projects\EMSMonitoring\EMSMonitoring\src\main\java\com\digitalstrom\dshub\esb\logic\EmailNotifierFactory.java
 C:\Personal\Projects\EMSMonitoring\EMSMonitoring\src\main\java\com\digitalstrom\dshub\esb\logic\DestinationsInfoFactory.java
 C:\Personal\Projects\EMSMonitoring\EMSMonitoring\src\main\java\com\digitalstrom\dshub\esb\logic\ConsoleNotifierFactory.java
 C:\Personal\Projects\EMSMonitoring\EMSMonitoring\src\main\java\com\digitalstrom\dshub\esb\logic\ConsoleNotifier.java
@@ -13,4 +15,3 @@ C:\Personal\Projects\EMSMonitoring\EMSMonitoring\src\main\java\com\digitalstrom\
 C:\Personal\Projects\EMSMonitoring\EMSMonitoring\src\main\java\com\digitalstrom\dshub\esb\contract\INotifier.java
 C:\Personal\Projects\EMSMonitoring\EMSMonitoring\src\main\java\com\digitalstrom\dshub\esb\contract\IMonitorStatisticsProvider.java
 C:\Personal\Projects\EMSMonitoring\EMSMonitoring\src\main\java\com\digitalstrom\dshub\esb\logic\MonitorPoller.java
-C:\Personal\Projects\EMSMonitoring\EMSMonitoring\src\main\java\com\digitalstrom\dshub\esb\logic\MonitorAgent.java

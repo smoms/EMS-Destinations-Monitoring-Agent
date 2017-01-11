@@ -1,6 +1,7 @@
 com\digitalstrom\dshub\esb\logic\AdminProvider.class
 com\digitalstrom\dshub\esb\contract\INotifier.class
 com\digitalstrom\dshub\esb\logic\DestinationsInfoFactory.class
+com\digitalstrom\dshub\esb\logic\EMSMonitoringAgent.class
 com\digitalstrom\dshub\esb\logic\MonitorPoller.class
 com\digitalstrom\dshub\esb\contract\IMonitorStatisticsProvider.class
 com\digitalstrom\dshub\esb\util\ReadConfigs.class
@@ -14,4 +15,4 @@ com\digitalstrom\dshub\esb\logic\EmailNotifier.class
 com\digitalstrom\dshub\esb\contract\IDestinationInfoProvider.class
 com\digitalstrom\dshub\esb\logic\TopicsInfoProvider.class
 com\digitalstrom\dshub\esb\contract\IAdminProvider.class
-com\digitalstrom\dshub\esb\logic\MonitorAgent.class
+com\digitalstrom\dshub\esb\logic\EmailNotifierFactory.class
