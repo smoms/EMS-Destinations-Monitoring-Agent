@@ -5,4 +5,4 @@ It is a Maven project. You can build it in Eclipse or run the jar (with dependen
 
 
 NB <br/>
-you need to add libs folder including EMS client <i>tib*.jar</i> files
+you need to add <i>libs</i> folder including EMS client <i>tib*.jar</i> files
