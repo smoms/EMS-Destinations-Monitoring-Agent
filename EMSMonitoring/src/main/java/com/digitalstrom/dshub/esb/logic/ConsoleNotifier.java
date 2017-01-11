@@ -12,13 +12,13 @@ public class ConsoleNotifier implements INotifier {
 
 	public void SendNotification(Map notificationBacklog, boolean isDelatBacklog, String title, String serverName, String env) {
 
-		logger.info(title + " from the server " + serverName + " in the environement " + env);
+		logger.info(title + " from the server " + serverName + " in " + env + " environement");
 		if (notificationBacklog != null)
 			if (isDelatBacklog)
 				logger.info("Message Destination Delta Backlog: " + notificationBacklog.toString());
 			else
 				logger.info("Message Destination Backlog: " + notificationBacklog.toString());
-		logger.info("Notification sent. ");
+		logger.debug("Notification sent.");
 	}
 
 }

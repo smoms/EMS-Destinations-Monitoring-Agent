@@ -31,7 +31,7 @@ public class MonitorPoller implements Runnable {
 	private int polling_time_is_msec = 30000; //default to 30s
 	private Date notificationDate = null;
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-	private INotifier notifier = NotifierFactory.getFactory("ConsoleNotifierFactory").getNotifier();
+	private INotifier notifier = null;
 	private Map<String, String> map = ReadConfigs.getInstance();
 	private int message_count_threshold = 1;
 	private IAdminProvider adminP;
@@ -42,6 +42,7 @@ public class MonitorPoller implements Runnable {
 		logger.debug("Connecting to the server..");
 		msp_queues = new MonitorStatisticsProvider("QueuesInfoProvider");
 		msp_topics = new MonitorStatisticsProvider("TopicsInfoProvider");
+		this.notifier = NotifierFactory.getFactory(map.get("notifier")).getNotifier();
 		this.polling_time_is_msec = Integer.parseInt(map.get("serverpollingtimeinsec")) * 1000;
 		this.message_count_threshold = Integer.parseInt(map.get("messagecountthreshold"));
 		this.adminP = AdminProvider.getInstance();

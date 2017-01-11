@@ -31,7 +31,7 @@ public class EmailNotifier implements INotifier {
 	private Map<String, String> map = null;
 	private String emailbodytemplate;
 
-	private EmailNotifier() {
+	public EmailNotifier() {
 		super();
 		this.map = ReadConfigs.getInstance();
 		this.emailusername = map.get("emailusername");
