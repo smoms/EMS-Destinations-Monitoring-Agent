@@ -86,7 +86,7 @@ public class EmailNotifier implements INotifier {
 		StringBuilder deltaDest = new StringBuilder();
 		StringBuilder backlogDest = new StringBuilder();
 
-		logger.debug("Destination backlog: ");
+		logger.debug("Destination(s) backlog: ");
 		for (Entry<String, Long> entry : notificationBacklog.entrySet()) {
 			backlogDest.append(entry.getKey() + " : " + entry.getValue());
 			backlogDest.append("; ");
