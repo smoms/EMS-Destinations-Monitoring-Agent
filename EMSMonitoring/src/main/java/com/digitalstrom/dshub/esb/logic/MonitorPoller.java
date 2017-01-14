@@ -2,6 +2,7 @@ package com.digitalstrom.dshub.esb.logic;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,15 +29,16 @@ public class MonitorPoller implements Runnable {
 	private IMonitorStatisticsProvider msp_topics = null;
 	private Map<String, Long> notificationBacklog = null;
 	private Map<String, Long> notificationDeltaBacklog = null;
-	private int polling_time_is_msec = 30000; //default to 30s
-	private Date notificationDate = null;
-	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	private int polling_time_is_msec = 30000; // default to 30s
+	private Date notificationDate = null; // determines when a notification will
+	private Date timeNow = null;
+	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
 	private INotifier notifier = null;
 	private Map<String, String> map = ReadConfigs.getInstance();
 	private int message_count_threshold = 1;
 	private IAdminProvider adminP;
 	private String serverName;
-	
+
 	public MonitorPoller() throws Exception {
 		super();
 		logger.debug("Connecting to the server..");
@@ -49,6 +51,7 @@ public class MonitorPoller implements Runnable {
 		this.serverName = this.adminP.getAdminConnection().getInfo().getServerName();
 		this.notificationBacklog = new HashMap<String, Long>();
 		this.notificationDeltaBacklog = new HashMap<String, Long>();
+		this.timeNow = this.getTimeNow();
 	}
 
 	public void run() {
@@ -66,17 +69,28 @@ public class MonitorPoller implements Runnable {
 				logger.debug("The Poller is triggering the topic rules..");
 				this.applyDestinationRules(map_topics_mg_count, map_topics_mg_count_tmp,
 						MonitorPoller.destinationTopic);
-				if(this.notificationDate == null || sdf.parse(sdf.format(new Date())).after(this.notificationDate))
+				/*
+				 * if (this.notificationDate == null || sdf.parse(sdf.format(new
+				 * Date())).after(this.notificationDate))
+				 * this.sendNotification(this.notificationBacklog, false);
+				 */
+				timeNow = this.getTimeNow();
+				if (this.notificationDate == null || this.timeNow.compareTo(this.notificationDate) >= 0) {
 					this.sendNotification(this.notificationBacklog, false);
+					this.notificationDate = this.upsertNotificationDate(notificationDate);
+					logger.debug("Notification date refreshed: " + notificationDate);
+				}
 				this.sendNotification(this.notificationDeltaBacklog, true);
-				this.notificationDate = sdf.parse(sdf.format(new Date()));
-				logger.debug("Date refreshed: " + notificationDate);
+				logger.debug("Next backlog notification scheduled at about: " + sdf.format(notificationDate.getTime()));
+				/* this.notificationDate = sdf.parse(sdf.format(new Date())); */
+				// this.notificationDate =
+				// this.upsertNotificationDate(notificationDate);
 				logger.debug("The Poller is going to sleep for seconds: " + this.polling_time_is_msec / 1000);
 				Thread.sleep(polling_time_is_msec);
-			}catch(ParseException e){
+			} catch (ParseException e) {
 				logger.error("Error in the poller loop when converting date format: ");
 				e.printStackTrace();
-			}catch (Exception e) {
+			} catch (Exception e) {
 				logger.error("Error in the poller loop: ");
 				e.printStackTrace();
 			}
@@ -110,20 +124,45 @@ public class MonitorPoller implements Runnable {
 				if (countTmpThresholdMultiplier > countThresholdMultiplier)
 					this.notificationDeltaBacklog.put(entry.getKey(), entry.getValue());
 				map_destinations_msg_count.put(entry.getKey(), entry.getValue());
-			}else if (entry.getValue() > this.message_count_threshold) {
+			} else if (entry.getValue() > this.message_count_threshold) {
 				this.notificationBacklog.put(entry.getKey(), entry.getValue());
 				map_destinations_msg_count.put(entry.getKey(), entry.getValue());
 			}
 		}
 	}
 
-	private void sendNotification(Map notifBacklog, boolean isDeltaBacklog) throws ParseException, TibjmsAdminException {
+	private void sendNotification(Map notifBacklog, boolean isDeltaBacklog)
+			throws ParseException, TibjmsAdminException {
 		if (notifBacklog != null && notifBacklog.size() > 0) {
 			logger.debug("The Poller is triggering the notification..");
-			this.notifier.SendNotification(notifBacklog, isDeltaBacklog, map.get("emailtitle"), this.serverName, map.get("environment"));
+			this.notifier.SendNotification(notifBacklog, isDeltaBacklog, map.get("emailtitle"), this.serverName,
+					map.get("environment"));
 		}
-		if(isDeltaBacklog)
+		if (isDeltaBacklog)
 			this.notificationDeltaBacklog.clear();
 	}
-	
+
+	private Date upsertNotificationDate(Date notifDate) {
+		Calendar calNotifDate = Calendar.getInstance();
+		int notifPeriod;
+		try {
+			notifPeriod = Integer.parseInt(map.get("notificationperiodinhours"));
+		} catch (NumberFormatException e) {
+			notifPeriod = 24; // default is 24h
+			logger.error("notificationPeriodInHours configuration parameter is not a valid number. Fallback to default time: " + notifPeriod
+					+ "h");
+		}
+		if (notifDate != null)
+			calNotifDate.setTime(notifDate);
+		else
+			calNotifDate.setTime(new Date());
+		calNotifDate.add(Calendar.HOUR_OF_DAY, notifPeriod); //add notification period as offset
+		return calNotifDate.getTime();
+	}
+
+	private Date getTimeNow() {
+		Calendar cal = Calendar.getInstance(); // creates calendar
+		cal.setTime(new Date()); // sets calendar time/date
+		return cal.getTime(); // returns new date object, one hour in the future
+	}
 }
