@@ -12,7 +12,7 @@ import org.apache.log4j.Logger;
 
 public class ReadConfigs {
 
-	private static final String FILENAME;
+	private static String configFilePath;
 	private static Map<String, String> configParams;
 	final static Logger logger = Logger.getLogger("ReadConfigs");
 	
@@ -26,13 +26,13 @@ public class ReadConfigs {
 	//static block initialization for exception handling
     static{
         try{
-        	FILENAME = new File("").getAbsolutePath().concat("\\config\\server_conf.cfg");
-        	logger.debug("Configuration file is being searched at location: "+ FILENAME);
+        	configFilePath = new File("").getAbsolutePath().concat("\\config\\server_conf.cfg");
+        	logger.debug("Configuration file is being searched at location: "+ configFilePath);
         	configParams = new ReadConfigs().getConfParameters();
         	for(Map.Entry<String, String> entry : configParams.entrySet())
         		logger.debug(entry.getKey() + "=" + entry.getValue());
         }catch(Exception e){
-            logger.error("Error in ReadConfigs class while executing the singleton creation block");
+            logger.error("Error in ReadConfigs class while executing the creation block");
             e.printStackTrace();
         }
     }
@@ -45,10 +45,10 @@ public class ReadConfigs {
 		
 		try {
 
-			fr = new FileReader(FILENAME);
+			fr = new FileReader(configFilePath);
 			br = new BufferedReader(fr);
 			String sCurrentLine;
-			br = new BufferedReader(new FileReader(FILENAME));
+			br = new BufferedReader(new FileReader(configFilePath));
 
 			while ((sCurrentLine = br.readLine()) != null) {
 				if(sCurrentLine.startsWith("#") || sCurrentLine.isEmpty())
