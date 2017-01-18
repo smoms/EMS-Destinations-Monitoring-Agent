@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
@@ -28,7 +27,7 @@ public class ReadConfigs {
     static{
         try{
         	FILENAME = new File("").getAbsolutePath().concat("\\config\\server_conf.cfg");
-        	logger.debug("Configuration file searched at location: "+FILENAME);
+        	logger.debug("Configuration file is being searched at location: "+ FILENAME);
         	configParams = new ReadConfigs().getConfParameters();
         	for(Map.Entry<String, String> entry : configParams.entrySet())
         		logger.debug(entry.getKey() + "=" + entry.getValue());
@@ -47,9 +46,7 @@ public class ReadConfigs {
 
 			fr = new FileReader(FILENAME);
 			br = new BufferedReader(fr);
-
 			String sCurrentLine;
-
 			br = new BufferedReader(new FileReader(FILENAME));
 
 			while ((sCurrentLine = br.readLine()) != null) {
@@ -62,29 +59,19 @@ public class ReadConfigs {
 				else
 					map.put(tokens[0].trim().toLowerCase(), "");
 			}
-
 		} catch (IOException e) {
-
+			logger.error("Error in ReadConfigs class while reading or parsing the configuration file");
 			e.printStackTrace();
-
 		} finally {
-
 			try {
-
 				if (br != null)
 					br.close();
-
 				if (fr != null)
 					fr.close();
-
 			} catch (IOException ex) {
-
 				ex.printStackTrace();
-
 			}
-			
 		}
-		
 		return map;
 	}
 
