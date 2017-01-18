@@ -1,6 +1,7 @@
 package com.digitalstrom.dshub.esb.util;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
@@ -12,7 +13,7 @@ import org.apache.log4j.Logger;
 
 public class ReadConfigs {
 
-	private static final String FILENAME = "C:\\Personal\\Projects\\EMSMonitoring\\EMSMonitoring\\config\\server_conf.cfg";
+	private static final String FILENAME;
 	private static Map<String, String> configParams;
 	final static Logger logger = Logger.getLogger("ReadConfigs");
 	
@@ -26,6 +27,8 @@ public class ReadConfigs {
 	//static block initialization for exception handling
     static{
         try{
+        	FILENAME = new File("").getAbsolutePath().concat("\\config\\server_conf.cfg");
+        	logger.debug("Configuration file searched at location: "+FILENAME);
         	configParams = new ReadConfigs().getConfParameters();
         	for(Map.Entry<String, String> entry : configParams.entrySet())
         		logger.debug(entry.getKey() + "=" + entry.getValue());
