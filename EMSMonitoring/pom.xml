@@ -44,17 +44,19 @@
 		<dependency>
 			<groupId>tibjms</groupId>
 			<artifactId>tibjms</artifactId>
-			<scope>system</scope>
 			<version>1.0</version>
-			<systemPath>${basedir}\libs\tibjms.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>tibjmsadmin</groupId>
 			<artifactId>tibjmsadmin</artifactId>
-			<scope>system</scope>
 			<version>1.0</version>
-			<systemPath>${basedir}\libs\tibjmsadmin.jar</systemPath>
 		</dependency>
+		<dependency>
+			<groupId>javax.jms</groupId>
+			<artifactId>javax.jms-api</artifactId>
+			<version>2.0.1</version>
+		</dependency>
+
 
 	</dependencies>
 	<build>

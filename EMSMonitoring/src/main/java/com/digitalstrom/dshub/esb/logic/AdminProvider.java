@@ -17,13 +17,15 @@ public class AdminProvider implements IAdminProvider {
 
 	private static volatile IAdminProvider instance;
 
-	private AdminProvider() throws TibjmsAdminException {
+	private AdminProvider() {
 			try {
 				this.map = ReadConfigs.getInstance();
 				this.admin = new TibjmsAdmin(map.get("serverurl"), map.get("username"), map.get("password"));
 				logger.info("ConfigProvider instance created");
 			} catch (Exception e) {
-				throw new RuntimeException("Exception occured in creating singleton instance");
+				logger.error("Error in AdminProvider class while creating the instance");
+				e.printStackTrace();
+				throw new RuntimeException("Error in AdminProvider class while creating the instance");
 			}
 	}
 
