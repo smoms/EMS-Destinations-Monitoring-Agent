@@ -32,7 +32,8 @@ public class ReadConfigs {
         	for(Map.Entry<String, String> entry : configParams.entrySet())
         		logger.debug(entry.getKey() + "=" + entry.getValue());
         }catch(Exception e){
-            throw new RuntimeException("Exception occured in creating singleton instance");
+            logger.error("Error in ReadConfigs class while executing the singleton creation block");
+            e.printStackTrace();
         }
     }
     
