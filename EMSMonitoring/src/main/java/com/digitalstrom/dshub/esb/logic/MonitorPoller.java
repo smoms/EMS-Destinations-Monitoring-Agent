@@ -64,10 +64,10 @@ public class MonitorPoller implements Runnable {
 				logger.debug("Poller got these topics and pending messages: " + map_topics_mg_count_tmp);
 				logger.info("Poller has these queues and pending messages stored in memory: " + map_queues_mg_count);
 				logger.info("Poller has these topics and pending messages stored in memory: " + map_topics_mg_count);
-				logger.info("The Poller is triggering the queue check rules..");
+				logger.info("The Poller is triggering the queues check rules..");
 				this.applyDestinationRules(map_queues_mg_count, map_queues_mg_count_tmp,
 						MonitorPoller.destinationQueue);
-				logger.info("The Poller is triggering the topic check rules..");
+				logger.info("The Poller is triggering the topics check rules..");
 				this.applyDestinationRules(map_topics_mg_count, map_topics_mg_count_tmp,
 						MonitorPoller.destinationTopic);
 				timeNow = this.getTimeNow();
