@@ -18,7 +18,7 @@ public class TopicsInfoProvider implements IDestinationInfoProvider{
 			//test connection:
 		} catch (TibjmsAdminException e) {
 			e.printStackTrace();
-			logger.error("Error in TopicsInfoProvider class while getting server connection. Connection creation re-try..");
+			logger.error("Error while getting server connection. Connection re-try..");
 			AdminProvider.resetInstance();
 			this.admin = AdminProvider.getInstance().getAdminConnection();
 		}

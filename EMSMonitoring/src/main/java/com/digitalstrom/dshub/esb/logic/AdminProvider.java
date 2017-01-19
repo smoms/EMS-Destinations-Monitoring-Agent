@@ -17,15 +17,18 @@ public class AdminProvider implements IAdminProvider {
 
 	private static volatile IAdminProvider instance;
 
-	private AdminProvider() {
+	private AdminProvider() throws TibjmsAdminException {
 			try {
 				this.map = ReadConfigs.getInstance();
 				this.admin = new TibjmsAdmin(map.get("serverurl"), map.get("username"), map.get("password"));
 				logger.info("ConfigProvider instance created");
-			} catch (Exception e) {
+			}catch (TibjmsAdminException e) {
 				logger.error("Error in AdminProvider class while creating the connection");
 				e.printStackTrace();
-				throw new RuntimeException("Error in AdminProvider class while creating the connection");
+				throw new TibjmsAdminException("Error in AdminProvider class while creating the connection");
+			}catch (Exception e) {
+				logger.error("Error in AdminProvider class");
+				e.printStackTrace();
 			}
 	}
 
