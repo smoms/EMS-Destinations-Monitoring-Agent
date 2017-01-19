@@ -60,14 +60,14 @@ public class MonitorPoller implements Runnable {
 				logger.info("Connection status: ok");
 				this.map_queues_mg_count_tmp = msp_queues.getDestinationsPendingMessageCount();
 				this.map_topics_mg_count_tmp = msp_topics.getDestinationsPendingMessageCount();
-				logger.debug("Poller got these queues and pending messages: " + map_queues_mg_count_tmp);
-				logger.debug("Poller got these topics and pending messages: " + map_topics_mg_count_tmp);
+				logger.debug("Poller has got these queues and pending messages: " + map_queues_mg_count_tmp);
+				logger.debug("Poller has got these topics and pending messages: " + map_topics_mg_count_tmp);
 				logger.info("Poller has these queues and pending messages stored in memory: " + map_queues_mg_count);
 				logger.info("Poller has these topics and pending messages stored in memory: " + map_topics_mg_count);
-				logger.info("The Poller is triggering the queues check rules..");
+				logger.info("The Poller is triggering the queues checking rules..");
 				this.applyDestinationRules(map_queues_mg_count, map_queues_mg_count_tmp,
 						MonitorPoller.destinationQueue);
-				logger.info("The Poller is triggering the topics check rules..");
+				logger.info("The Poller is triggering the topics checking rules..");
 				this.applyDestinationRules(map_topics_mg_count, map_topics_mg_count_tmp,
 						MonitorPoller.destinationTopic);
 				timeNow = this.getTimeNow();
