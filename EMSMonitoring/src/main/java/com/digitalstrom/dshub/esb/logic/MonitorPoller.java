@@ -41,39 +41,35 @@ public class MonitorPoller implements Runnable {
 
 	public MonitorPoller() throws Exception {
 		super();
-		logger.info("Connecting to the server..");
-		msp_queues = new MonitorStatisticsProvider("QueuesInfoProvider");
-		msp_topics = new MonitorStatisticsProvider("TopicsInfoProvider");
 		this.notifier = NotifierFactory.getFactory(map.get("notifier")).getNotifier();
 		this.polling_time_is_msec = Integer.parseInt(map.get("serverpollingtimeinsec")) * 1000;
 		this.message_count_threshold = Integer.parseInt(map.get("messagecountthreshold"));
-		this.adminP = AdminProvider.getInstance();
-		this.serverName = this.adminP.getAdminConnection().getInfo().getServerName();
 		this.notificationBacklog = new HashMap<String, Long>();
 		this.notificationDeltaBacklog = new HashMap<String, Long>();
 		this.timeNow = this.getTimeNow();
+		logger.info("Connecting to the server..");
 	}
 
 	public void run() {
 		while (true) {
 			try {
+				this.msp_queues = new MonitorStatisticsProvider("QueuesInfoProvider");
+				this.msp_topics = new MonitorStatisticsProvider("TopicsInfoProvider");
+				this.adminP = AdminProvider.getInstance();
+				this.serverName = this.adminP.getAdminConnection().getInfo().getServerName();
+				logger.info("Connection status: ok");
 				this.map_queues_mg_count_tmp = msp_queues.getDestinationsPendingMessageCount();
 				this.map_topics_mg_count_tmp = msp_topics.getDestinationsPendingMessageCount();
 				logger.debug("Poller got these queues and pending messages: " + map_queues_mg_count_tmp);
 				logger.debug("Poller got these topics and pending messages: " + map_topics_mg_count_tmp);
 				logger.info("Poller has these queues and pending messages stored in memory: " + map_queues_mg_count);
 				logger.info("Poller has these topics and pending messages stored in memory: " + map_topics_mg_count);
-				logger.debug("The Poller is triggering the queue rules..");
+				logger.info("The Poller is triggering the queue check rules..");
 				this.applyDestinationRules(map_queues_mg_count, map_queues_mg_count_tmp,
 						MonitorPoller.destinationQueue);
-				logger.debug("The Poller is triggering the topic rules..");
+				logger.info("The Poller is triggering the topic check rules..");
 				this.applyDestinationRules(map_topics_mg_count, map_topics_mg_count_tmp,
 						MonitorPoller.destinationTopic);
-				/*
-				 * if (this.notificationDate == null || sdf.parse(sdf.format(new
-				 * Date())).after(this.notificationDate))
-				 * this.sendNotification(this.notificationBacklog, false);
-				 */
 				timeNow = this.getTimeNow();
 				if (this.notificationDate == null || this.timeNow.compareTo(this.notificationDate) >= 0) {
 					this.sendNotification(this.notificationBacklog, false);
@@ -82,16 +78,17 @@ public class MonitorPoller implements Runnable {
 				}
 				this.sendNotification(this.notificationDeltaBacklog, true);
 				logger.info("Next backlog notification scheduled at about: " + sdf.format(notificationDate.getTime()));
-				/* this.notificationDate = sdf.parse(sdf.format(new Date())); */
-				// this.notificationDate =
-				// this.upsertNotificationDate(notificationDate);
 				logger.info("The Poller is going to sleep for seconds: " + this.polling_time_is_msec / 1000);
-				Thread.sleep(polling_time_is_msec);
 			} catch (ParseException e) {
 				logger.error("Error in the poller loop when converting date format: ");
 				e.printStackTrace();
-			} catch (Exception e) {
-				logger.error("Error in the poller loop: ");
+			}catch (Exception e) {
+				logger.error("Error in the Poller loop");
+				e.printStackTrace();
+			}
+			try {
+				Thread.sleep(polling_time_is_msec);
+			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}

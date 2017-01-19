@@ -23,9 +23,9 @@ public class AdminProvider implements IAdminProvider {
 				this.admin = new TibjmsAdmin(map.get("serverurl"), map.get("username"), map.get("password"));
 				logger.info("ConfigProvider instance created");
 			} catch (Exception e) {
-				logger.error("Error in AdminProvider class while creating the instance");
+				logger.error("Error in AdminProvider class while creating the connection");
 				e.printStackTrace();
-				throw new RuntimeException("Error in AdminProvider class while creating the instance");
+				throw new RuntimeException("Error in AdminProvider class while creating the connection");
 			}
 	}
 
@@ -43,6 +43,15 @@ public class AdminProvider implements IAdminProvider {
 
 	public TibjmsAdmin getAdminConnection() {
 		return admin;
+	}
+	
+	public void setAdminConnection(TibjmsAdmin admin) {
+		this.admin = admin;
+	}
+	
+	//Used for exception handling when server connection is broken
+	public static void resetInstance(){
+		instance = null;
 	}
 
 }

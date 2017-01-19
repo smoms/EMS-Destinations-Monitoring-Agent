@@ -13,8 +13,16 @@ public class TopicsInfoProvider implements IDestinationInfoProvider{
 	TibjmsAdmin admin = null;
 
 	public TopicsInfoProvider() throws TibjmsAdminException {
-		this.admin = AdminProvider.getInstance().getAdminConnection();
-		logger.info("Admin provider object obtained with connectionId: "+ this.admin.getConnectionId());
+		try {
+			this.admin = AdminProvider.getInstance().getAdminConnection();
+			//test connection:
+		} catch (TibjmsAdminException e) {
+			e.printStackTrace();
+			logger.error("Error in TopicsInfoProvider class while getting server connection. Connection creation re-try..");
+			AdminProvider.resetInstance();
+			this.admin = AdminProvider.getInstance().getAdminConnection();
+		}
+		logger.info("connectionId: "+ this.admin.getConnectionId());
 	}
 
 	public DestinationInfo[] getDestinationsInfo() throws TibjmsAdminException {
