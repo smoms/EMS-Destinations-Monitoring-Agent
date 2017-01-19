@@ -41,7 +41,7 @@ public class MonitorPoller implements Runnable {
 
 	public MonitorPoller() throws Exception {
 		super();
-		logger.debug("Connecting to the server..");
+		logger.info("Connecting to the server..");
 		msp_queues = new MonitorStatisticsProvider("QueuesInfoProvider");
 		msp_topics = new MonitorStatisticsProvider("TopicsInfoProvider");
 		this.notifier = NotifierFactory.getFactory(map.get("notifier")).getNotifier();
@@ -61,8 +61,8 @@ public class MonitorPoller implements Runnable {
 				this.map_topics_mg_count_tmp = msp_topics.getDestinationsPendingMessageCount();
 				logger.debug("Poller got these queues and pending messages: " + map_queues_mg_count_tmp);
 				logger.debug("Poller got these topics and pending messages: " + map_topics_mg_count_tmp);
-				logger.debug("Poller has these queues and pending messages stored in memory: " + map_queues_mg_count);
-				logger.debug("Poller has these topics and pending messages stored in memory: " + map_topics_mg_count);
+				logger.info("Poller has these queues and pending messages stored in memory: " + map_queues_mg_count);
+				logger.info("Poller has these topics and pending messages stored in memory: " + map_topics_mg_count);
 				logger.debug("The Poller is triggering the queue rules..");
 				this.applyDestinationRules(map_queues_mg_count, map_queues_mg_count_tmp,
 						MonitorPoller.destinationQueue);
@@ -81,11 +81,11 @@ public class MonitorPoller implements Runnable {
 					logger.debug("Notification date refreshed: " + notificationDate);
 				}
 				this.sendNotification(this.notificationDeltaBacklog, true);
-				logger.debug("Next backlog notification scheduled at about: " + sdf.format(notificationDate.getTime()));
+				logger.info("Next backlog notification scheduled at about: " + sdf.format(notificationDate.getTime()));
 				/* this.notificationDate = sdf.parse(sdf.format(new Date())); */
 				// this.notificationDate =
 				// this.upsertNotificationDate(notificationDate);
-				logger.debug("The Poller is going to sleep for seconds: " + this.polling_time_is_msec / 1000);
+				logger.info("The Poller is going to sleep for seconds: " + this.polling_time_is_msec / 1000);
 				Thread.sleep(polling_time_is_msec);
 			} catch (ParseException e) {
 				logger.error("Error in the poller loop when converting date format: ");
@@ -134,7 +134,7 @@ public class MonitorPoller implements Runnable {
 	private void sendNotification(Map notifBacklog, boolean isDeltaBacklog)
 			throws ParseException, TibjmsAdminException {
 		if (notifBacklog != null && notifBacklog.size() > 0) {
-			logger.debug("The Poller is triggering the notification..");
+			logger.info("The Poller is triggering the notification..");
 			this.notifier.SendNotification(notifBacklog, isDeltaBacklog, map.get("emailtitle"), this.serverName,
 					map.get("environment"));
 		}

@@ -20,6 +20,6 @@ public class EMSMonitoringAgent {
 
 	public static void main(String[] args) {
 		EMSMonitoringAgent mon = new EMSMonitoringAgent();
-		logger.debug("Useless main thread is going to die");
+		logger.info("Useless main thread is going to die");
 	}
 }

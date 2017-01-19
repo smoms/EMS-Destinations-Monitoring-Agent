@@ -76,7 +76,8 @@ public class EmailNotifier implements INotifier {
 			logger.debug("Notiication email sent to: " + this.receiverslist + " from: " + this.fromaddress
 					+ " with body: " + this.emailbodytemplate);
 		} catch (MessagingException e) {
-			logger.error("Error while sending notification email: " + e);
+			logger.error("Error in EmailNotifier class while sending notification email: " + e);
+			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
 	}
