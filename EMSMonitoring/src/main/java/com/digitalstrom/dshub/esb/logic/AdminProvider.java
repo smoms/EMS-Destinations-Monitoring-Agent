@@ -48,10 +48,6 @@ public class AdminProvider implements IAdminProvider {
 		return admin;
 	}
 	
-	public void setAdminConnection(TibjmsAdmin admin) {
-		this.admin = admin;
-	}
-	
 	//Used for exception handling when server connection is broken
 	public static void resetInstance(){
 		instance = null;
