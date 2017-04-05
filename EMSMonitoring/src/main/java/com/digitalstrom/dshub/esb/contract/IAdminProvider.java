@@ -6,6 +6,3 @@ public interface IAdminProvider {
 
 	public TibjmsAdmin getAdminConnection();
 }
-
-
-
