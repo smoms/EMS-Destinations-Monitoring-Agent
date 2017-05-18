@@ -153,8 +153,8 @@ public class MonitorPoller implements Runnable {
 			calNotifDate.setTime(notifDate);
 		else
 			calNotifDate.setTime(new Date());
-		//calNotifDate.add(Calendar.HOUR_OF_DAY, notifPeriod); //add notification period as offset
-		calNotifDate.add(Calendar.SECOND, notifPeriod); //add notification period as offset
+		calNotifDate.add(Calendar.HOUR_OF_DAY, notifPeriod); //add notification period as offset
+		//calNotifDate.add(Calendar.SECOND, notifPeriod); //add notification period as offset
 		return calNotifDate.getTime();
 	}
 
