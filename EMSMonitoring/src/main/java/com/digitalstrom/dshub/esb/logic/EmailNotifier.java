@@ -66,7 +66,7 @@ public class EmailNotifier implements INotifier {
 			Message message = new MimeMessage(session);
 			message.setFrom(new InternetAddress(this.emailusername));
 			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(this.receiverslist));
-			message.setSubject(title + " from the server " + serverName + env + " environement");
+			message.setSubject(title + " for the server " + serverName + " in the " + env + " environement");
 
 			emailBody = this.prepareEmailBody(notificationBacklog, emailbodytemplate);
 			message.setText(emailBody);

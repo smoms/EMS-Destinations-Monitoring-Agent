@@ -114,7 +114,7 @@ public class MonitorPoller implements Runnable {
 				countTmpThresholdMultiplier = newCount / this.message_count_threshold;
 				if (countTmpThresholdMultiplier > countThresholdMultiplier)
 					this.notificationDeltaBacklog.put(entry.getKey(), entry.getValue()); //update the notification backlog because the load is over at least another threshold
-				else if(newCount > this.message_count_threshold && countTmpThresholdMultiplier < countThresholdMultiplier
+				else if(newCount > this.message_count_threshold && countTmpThresholdMultiplier <= countThresholdMultiplier
 						&& this.notificationDeltaBacklog.containsKey(entry.getKey()))
 				{//we remove the entry from the delta notification backlogs since the load on this destination has decreased below a multiple threshold
 					logger.debug(LogUtil.lazyFormat("Removing destination %s from delta backlog because load is decreased to %s ", entry.getKey(), newCount));
