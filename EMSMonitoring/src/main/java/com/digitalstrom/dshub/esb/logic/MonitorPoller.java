@@ -98,31 +98,31 @@ public class MonitorPoller implements Runnable {
 	}
 
 	private void applyDestinationRules(Map<String, Long> map_destinations_msg_count,
-			Map<String, Long> map_destinations_mg_count_tmp, int destinationType) throws ParseException {
+			Map<String, Long> map_destinations_mg_count_new, int destinationType) throws ParseException {
 
 		Integer count = new Integer(0);
-		Integer tmpCount = new Integer(0);
+		Integer newCount = new Integer(0);
 		Integer countThresholdMultiplier = new Integer(0);
 		Integer countTmpThresholdMultiplier = new Integer(0);
 
 		
-		for (Map.Entry<String, Long> entry : map_destinations_mg_count_tmp.entrySet()) {
+		for (Map.Entry<String, Long> entry : map_destinations_mg_count_new.entrySet()) {
 			if (map_destinations_msg_count.containsKey(entry.getKey())) {
 				count = map_destinations_msg_count.get(entry.getKey()).intValue();
-				tmpCount = map_destinations_mg_count_tmp.get(entry.getKey()).intValue();
+				newCount = map_destinations_mg_count_new.get(entry.getKey()).intValue();
 				countThresholdMultiplier = count / this.message_count_threshold;
-				countTmpThresholdMultiplier = tmpCount / this.message_count_threshold;
+				countTmpThresholdMultiplier = newCount / this.message_count_threshold;
 				if (countTmpThresholdMultiplier > countThresholdMultiplier)
 					this.notificationDeltaBacklog.put(entry.getKey(), entry.getValue()); //update the notification backlog because the load is over at least another threshold
-				else if(tmpCount > this.message_count_threshold && countTmpThresholdMultiplier < countThresholdMultiplier
+				else if(newCount > this.message_count_threshold && countTmpThresholdMultiplier < countThresholdMultiplier
 						&& this.notificationDeltaBacklog.containsKey(entry.getKey()))
 				{//we remove the entry from the delta notification backlogs since the load on this destination has decreased below a multiple threshold
-					logger.debug(LogUtil.lazyFormat("Removing destination %s from delta backlog because load is decreased to %s ", entry.getKey(), tmpCount));
+					logger.debug(LogUtil.lazyFormat("Removing destination %s from delta backlog because load is decreased to %s ", entry.getKey(), newCount));
 					this.notificationDeltaBacklog.remove(entry.getKey());				
 				} else if ((this.notificationDeltaBacklog.containsKey(entry.getKey()) || this.notificationBacklog.containsKey(entry.getKey())) && 
-						tmpCount < this.message_count_threshold){
+						newCount < this.message_count_threshold){
 					//we remove the entry from both notification backlogs since the load on this destination is below 1x threshold
-					logger.debug(LogUtil.lazyFormat("Removing destination %s from all backlogs because load is decreased to %s ", entry.getKey(), tmpCount));
+					logger.debug(LogUtil.lazyFormat("Removing destination %s from all backlogs because load is decreased to %s ", entry.getKey(), newCount));
 					this.notificationDeltaBacklog.remove(entry.getKey());
 					this.notificationBacklog.remove(entry.getKey());
 				}			
