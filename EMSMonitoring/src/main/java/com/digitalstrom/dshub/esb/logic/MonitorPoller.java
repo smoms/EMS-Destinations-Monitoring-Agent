@@ -2,17 +2,19 @@ package com.digitalstrom.dshub.esb.logic;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
 
-import org.apache.log4j.Logger;
+
+import org.apache.log4j.*;
 
 import com.digitalstrom.dshub.esb.contract.IAdminProvider;
 import com.digitalstrom.dshub.esb.contract.IMonitorStatisticsProvider;
 import com.digitalstrom.dshub.esb.contract.INotifier;
+import com.digitalstrom.dshub.esb.util.LogUtil;
 import com.digitalstrom.dshub.esb.util.ReadConfigs;
 import com.tibco.tibjms.admin.TibjmsAdminException;
 
@@ -48,6 +50,7 @@ public class MonitorPoller implements Runnable {
 		this.notificationDeltaBacklog = new HashMap<String, Long>();
 		this.timeNow = this.getTimeNow();
 		logger.info("Connecting to the server..");
+		
 	}
 
 	public void run() {
@@ -105,11 +108,11 @@ public class MonitorPoller implements Runnable {
 		// Initialize map_destination_msg_count hashset
 		if (map_destinations_msg_count == null) {
 			if (destinationType == MonitorPoller.destinationQueue) {
-				map_queues_mg_count = new HashMap<String, Long>();
-				map_destinations_msg_count = map_queues_mg_count;
+				this.map_queues_mg_count = new HashMap<String, Long>();
+				map_destinations_msg_count = this.map_queues_mg_count;
 			} else {
-				map_topics_mg_count = new HashMap<String, Long>();
-				map_destinations_msg_count = map_topics_mg_count;
+				this.map_topics_mg_count = new HashMap<String, Long>();
+				map_destinations_msg_count = this.map_topics_mg_count;
 			}
 		}
 		for (Map.Entry<String, Long> entry : map_destinations_mg_count_tmp.entrySet()) {
@@ -118,8 +121,23 @@ public class MonitorPoller implements Runnable {
 				tmpCount = map_destinations_mg_count_tmp.get(entry.getKey()).intValue();
 				countThresholdMultiplier = count / this.message_count_threshold;
 				countTmpThresholdMultiplier = tmpCount / this.message_count_threshold;
+				
+				logger.debug("Previous backlog of the destination: " + entry.getKey() + count);
+				logger.debug("Current backlog of the destination: " + entry.getKey() + tmpCount);
 				if (countTmpThresholdMultiplier > countThresholdMultiplier)
-					this.notificationDeltaBacklog.put(entry.getKey(), entry.getValue());
+					this.notificationDeltaBacklog.put(entry.getKey(), entry.getValue()); //update the notification backlog
+				else if(tmpCount > this.message_count_threshold && countTmpThresholdMultiplier < countThresholdMultiplier
+						&& this.notificationDeltaBacklog.containsKey(entry.getKey()))
+				{//we remove the entry from the delta notification backlogs since the load on this destination has decreased below a multiple threshold
+					logger.debug(LogUtil.lazyFormat("Removing destination %s from delta backlog because load is decreased to %s ", entry.getKey(), tmpCount));
+					this.notificationDeltaBacklog.remove(entry.getKey());				
+				} else if ((this.notificationDeltaBacklog.containsKey(entry.getKey())  ||  this.notificationBacklog.containsKey(entry.getKey())) && 
+						tmpCount < this.message_count_threshold){
+					//we remove the entry from both notification backlogs since the load on this destination is below 1x threshold
+					logger.debug(LogUtil.lazyFormat("Removing destination %s from all backlogs because load is decreased to %s ", entry.getKey(), tmpCount));
+					this.notificationDeltaBacklog.remove(entry.getKey());
+					this.notificationBacklog.remove(entry.getKey());
+				}			
 				map_destinations_msg_count.put(entry.getKey(), entry.getValue());
 			} else if (entry.getValue() > this.message_count_threshold) {
 				this.notificationBacklog.put(entry.getKey(), entry.getValue());
@@ -153,8 +171,8 @@ public class MonitorPoller implements Runnable {
 			calNotifDate.setTime(notifDate);
 		else
 			calNotifDate.setTime(new Date());
-		calNotifDate.add(Calendar.HOUR_OF_DAY, notifPeriod); //add notification period as offset
-		//calNotifDate.add(Calendar.SECOND, notifPeriod); //add notification period as offset
+		//calNotifDate.add(Calendar.HOUR_OF_DAY, notifPeriod); //add notification period as offset
+		calNotifDate.add(Calendar.SECOND, notifPeriod); //add notification period as offset
 		return calNotifDate.getTime();
 	}
 
