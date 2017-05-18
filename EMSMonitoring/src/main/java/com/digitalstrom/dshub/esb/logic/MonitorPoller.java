@@ -23,10 +23,10 @@ public class MonitorPoller implements Runnable {
 	private final static Logger logger = Logger.getLogger("MonitorAgent");
 	private final static int destinationQueue = 0;
 	private final static int destinationTopic = 1;
-	private Map<String, Long> map_queues_mg_count_tmp = null;
-	private Map<String, Long> map_topics_mg_count_tmp = null;
-	private Map<String, Long> map_queues_mg_count = null;
-	private Map<String, Long> map_topics_mg_count = null;
+	private Map<String, Long> map_queues_mg_count_new = null;
+	private Map<String, Long> map_topics_mg_count_new = null;
+	private Map<String, Long> map_queues_mg_count = new HashMap<String, Long>();
+	private Map<String, Long> map_topics_mg_count = new HashMap<String, Long>();
 	private IMonitorStatisticsProvider msp_queues = null;
 	private IMonitorStatisticsProvider msp_topics = null;
 	private Map<String, Long> notificationBacklog = null;
@@ -61,17 +61,17 @@ public class MonitorPoller implements Runnable {
 				this.adminP = AdminProvider.getInstance();
 				this.serverName = this.adminP.getAdminConnection().getInfo().getServerName();
 				logger.info("Connection status: ok");
-				this.map_queues_mg_count_tmp = msp_queues.getDestinationsPendingMessageCount();
-				this.map_topics_mg_count_tmp = msp_topics.getDestinationsPendingMessageCount();
-				logger.debug("Poller has found these queues and pending messages respectively: " + map_queues_mg_count_tmp);
-				logger.debug("Poller has found these topics and pending messages respectively: " + map_topics_mg_count_tmp);
+				this.map_queues_mg_count_new = msp_queues.getDestinationsPendingMessageCount();
+				this.map_topics_mg_count_new = msp_topics.getDestinationsPendingMessageCount();
+				logger.debug("Poller has found these queues and pending messages respectively: " + map_queues_mg_count_new);
+				logger.debug("Poller has found these topics and pending messages respectively: " + map_topics_mg_count_new);
 				logger.info("Poller has these queues and pending messages stored in memory: " + map_queues_mg_count);
 				logger.info("Poller has these topics and pending messages stored in memory: " + map_topics_mg_count);
 				logger.info("The Poller is triggering the queues checking rules..");
-				this.applyDestinationRules(map_queues_mg_count, map_queues_mg_count_tmp,
+				this.applyDestinationRules(map_queues_mg_count, map_queues_mg_count_new,
 						MonitorPoller.destinationQueue);
 				logger.info("The Poller is triggering the topics checking rules..");
-				this.applyDestinationRules(map_topics_mg_count, map_topics_mg_count_tmp,
+				this.applyDestinationRules(map_topics_mg_count, map_topics_mg_count_new,
 						MonitorPoller.destinationTopic);
 				timeNow = this.getTimeNow();
 				if (this.notificationDate == null || this.timeNow.compareTo(this.notificationDate) >= 0) {
@@ -105,33 +105,21 @@ public class MonitorPoller implements Runnable {
 		Integer countThresholdMultiplier = new Integer(0);
 		Integer countTmpThresholdMultiplier = new Integer(0);
 
-		// Initialize map_destination_msg_count hashset
-		if (map_destinations_msg_count == null) {
-			if (destinationType == MonitorPoller.destinationQueue) {
-				this.map_queues_mg_count = new HashMap<String, Long>();
-				map_destinations_msg_count = this.map_queues_mg_count;
-			} else {
-				this.map_topics_mg_count = new HashMap<String, Long>();
-				map_destinations_msg_count = this.map_topics_mg_count;
-			}
-		}
+		
 		for (Map.Entry<String, Long> entry : map_destinations_mg_count_tmp.entrySet()) {
 			if (map_destinations_msg_count.containsKey(entry.getKey())) {
 				count = map_destinations_msg_count.get(entry.getKey()).intValue();
 				tmpCount = map_destinations_mg_count_tmp.get(entry.getKey()).intValue();
 				countThresholdMultiplier = count / this.message_count_threshold;
 				countTmpThresholdMultiplier = tmpCount / this.message_count_threshold;
-				
-				logger.debug("Previous backlog of the destination: " + entry.getKey() + count);
-				logger.debug("Current backlog of the destination: " + entry.getKey() + tmpCount);
 				if (countTmpThresholdMultiplier > countThresholdMultiplier)
-					this.notificationDeltaBacklog.put(entry.getKey(), entry.getValue()); //update the notification backlog
+					this.notificationDeltaBacklog.put(entry.getKey(), entry.getValue()); //update the notification backlog because the load is over at least another threshold
 				else if(tmpCount > this.message_count_threshold && countTmpThresholdMultiplier < countThresholdMultiplier
 						&& this.notificationDeltaBacklog.containsKey(entry.getKey()))
 				{//we remove the entry from the delta notification backlogs since the load on this destination has decreased below a multiple threshold
 					logger.debug(LogUtil.lazyFormat("Removing destination %s from delta backlog because load is decreased to %s ", entry.getKey(), tmpCount));
 					this.notificationDeltaBacklog.remove(entry.getKey());				
-				} else if ((this.notificationDeltaBacklog.containsKey(entry.getKey())  ||  this.notificationBacklog.containsKey(entry.getKey())) && 
+				} else if ((this.notificationDeltaBacklog.containsKey(entry.getKey()) || this.notificationBacklog.containsKey(entry.getKey())) && 
 						tmpCount < this.message_count_threshold){
 					//we remove the entry from both notification backlogs since the load on this destination is below 1x threshold
 					logger.debug(LogUtil.lazyFormat("Removing destination %s from all backlogs because load is decreased to %s ", entry.getKey(), tmpCount));
@@ -140,7 +128,7 @@ public class MonitorPoller implements Runnable {
 				}			
 				map_destinations_msg_count.put(entry.getKey(), entry.getValue());
 			} else if (entry.getValue() > this.message_count_threshold) {
-				this.notificationBacklog.put(entry.getKey(), entry.getValue());
+				this.notificationBacklog.put(entry.getKey(), entry.getValue()); //always update the notification backlog when the load is over 1x threshold
 				map_destinations_msg_count.put(entry.getKey(), entry.getValue());
 			}
 		}
