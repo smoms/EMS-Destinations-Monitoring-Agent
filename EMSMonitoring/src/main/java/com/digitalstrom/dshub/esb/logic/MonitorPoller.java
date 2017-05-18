@@ -29,8 +29,8 @@ public class MonitorPoller implements Runnable {
 	private IMonitorStatisticsProvider msp_topics = null;
 	private Map<String, Long> notificationBacklog = null;
 	private Map<String, Long> notificationDeltaBacklog = null;
-	private int polling_time_is_msec = 30000; // default to 30s
-	private Date notificationDate = null; // determines when a notification will
+	private int polling_time_in_msec = 30000; // default to 30s
+	private Date notificationDate = null; // determines when a notification will trigger
 	private Date timeNow = null;
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
 	private INotifier notifier = null;
@@ -42,7 +42,7 @@ public class MonitorPoller implements Runnable {
 	public MonitorPoller() throws Exception {
 		super();
 		this.notifier = NotifierFactory.getFactory(map.get("notifier")).getNotifier();
-		this.polling_time_is_msec = Integer.parseInt(map.get("serverpollingtimeinsec")) * 1000;
+		this.polling_time_in_msec = Integer.parseInt(map.get("serverpollingtimeinsec")) * 1000;
 		this.message_count_threshold = Integer.parseInt(map.get("messagecountthreshold"));
 		this.notificationBacklog = new HashMap<String, Long>();
 		this.notificationDeltaBacklog = new HashMap<String, Long>();
@@ -60,8 +60,8 @@ public class MonitorPoller implements Runnable {
 				logger.info("Connection status: ok");
 				this.map_queues_mg_count_tmp = msp_queues.getDestinationsPendingMessageCount();
 				this.map_topics_mg_count_tmp = msp_topics.getDestinationsPendingMessageCount();
-				logger.debug("Poller has got these queues and pending messages: " + map_queues_mg_count_tmp);
-				logger.debug("Poller has got these topics and pending messages: " + map_topics_mg_count_tmp);
+				logger.debug("Poller has found these queues and pending messages respectively: " + map_queues_mg_count_tmp);
+				logger.debug("Poller has found these topics and pending messages respectively: " + map_topics_mg_count_tmp);
 				logger.info("Poller has these queues and pending messages stored in memory: " + map_queues_mg_count);
 				logger.info("Poller has these topics and pending messages stored in memory: " + map_topics_mg_count);
 				logger.info("The Poller is triggering the queues checking rules..");
@@ -78,7 +78,7 @@ public class MonitorPoller implements Runnable {
 				}
 				this.sendNotification(this.notificationDeltaBacklog, true);
 				logger.info("Next backlog notification scheduled at about: " + sdf.format(notificationDate.getTime()));
-				logger.info("The Poller is going to sleep for seconds: " + this.polling_time_is_msec / 1000);
+				logger.info("The Poller is going to sleep for seconds: " + this.polling_time_in_msec / 1000);
 			} catch (ParseException e) {
 				logger.error("Error in the poller loop when converting date format: ");
 				e.printStackTrace();
@@ -87,7 +87,7 @@ public class MonitorPoller implements Runnable {
 				e.printStackTrace();
 			}
 			try {
-				Thread.sleep(polling_time_is_msec);
+				Thread.sleep(polling_time_in_msec);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -131,7 +131,7 @@ public class MonitorPoller implements Runnable {
 	private void sendNotification(Map notifBacklog, boolean isDeltaBacklog)
 			throws ParseException, TibjmsAdminException {
 		if (notifBacklog != null && notifBacklog.size() > 0) {
-			logger.info("The Poller is triggering the notification..");
+			logger.info("The Poller is triggering the notification to channel: " + map.get("notifier"));
 			this.notifier.SendNotification(notifBacklog, isDeltaBacklog, map.get("emailtitle"), this.serverName,
 					map.get("environment"));
 		}
@@ -153,7 +153,8 @@ public class MonitorPoller implements Runnable {
 			calNotifDate.setTime(notifDate);
 		else
 			calNotifDate.setTime(new Date());
-		calNotifDate.add(Calendar.HOUR_OF_DAY, notifPeriod); //add notification period as offset
+		//calNotifDate.add(Calendar.HOUR_OF_DAY, notifPeriod); //add notification period as offset
+		calNotifDate.add(Calendar.SECOND, notifPeriod); //add notification period as offset
 		return calNotifDate.getTime();
 	}
 
