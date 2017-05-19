@@ -32,7 +32,7 @@ public class MonitorPoller implements Runnable {
 	private Map<String, Long> notificationBacklog = null;
 	private Map<String, Long> notificationDeltaBacklog = null;
 	private int polling_time_in_msec = 30000; // default to 30s
-	private Date notificationDate = null; // determines when a notification will trigger
+	private Date notificationDate = null; // determines the period of the notification trigger
 	private Date timeNow = null;
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
 	private INotifier notifier = null;
@@ -146,7 +146,7 @@ public class MonitorPoller implements Runnable {
 	}
 
 	private Date upsertNotificationDate(Date notifDate) {
-		Calendar calNotifDate = Calendar.getInstance();
+		Calendar calNotifDateTmp = Calendar.getInstance();
 		int notifPeriod;
 		try {
 			notifPeriod = Integer.parseInt(map.get("notificationperiodinhours"));
@@ -156,12 +156,12 @@ public class MonitorPoller implements Runnable {
 					+ "h");
 		}
 		if (notifDate != null)
-			calNotifDate.setTime(notifDate);
+			calNotifDateTmp.setTime(notifDate);
 		else
-			calNotifDate.setTime(new Date());
-		//calNotifDate.add(Calendar.HOUR_OF_DAY, notifPeriod); //add notification period as offset
-		calNotifDate.add(Calendar.SECOND, notifPeriod); //add notification period as offset
-		return calNotifDate.getTime();
+			calNotifDateTmp.setTime(new Date());
+		calNotifDateTmp.add(Calendar.HOUR_OF_DAY, notifPeriod); //add notification period as offset
+		//calNotifDate.add(Calendar.SECOND, notifPeriod); //line for testing
+		return calNotifDateTmp.getTime();
 	}
 
 	private Date getTimeNow() {
